@@ -1,69 +1,226 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Star, StarHalf, Sparkles, Send } from 'lucide-react';
+import { feedbackConfig, Question } from '@/config/feedback.config';
 
 export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [hoverRating, setHoverRating] = useState<Record<string, number>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const { branding, questions } = feedbackConfig;
+
+  const handleChange = (id: string, value: any) => {
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleRatingHover = (id: string, value: number) => {
+    setHoverRating((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        setIsSuccess(true);
+      } else {
+        alert('Something went wrong, please try again!');
+      }
+    } catch (error) {
+      alert('Network error, please try again!');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const renderField = (q: Question) => {
+    const value = formData[q.id];
+
+    switch (q.type) {
+      case 'text':
+        return (
+          <input 
+            required={q.required}
+            type="text" 
+            value={value || ''}
+            onChange={(e) => handleChange(q.id, e.target.value)}
+            className="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-zinc-700"
+            placeholder={q.placeholder}
+          />
+        );
+      case 'number':
+        return (
+          <input 
+            required={q.required}
+            type="number" 
+            min={q.min} max={q.max}
+            value={value || ''}
+            onChange={(e) => handleChange(q.id, e.target.value)}
+            className="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-zinc-700"
+            placeholder={q.placeholder}
+          />
+        );
+      case 'textarea':
+        return (
+          <textarea 
+            required={q.required}
+            rows={3}
+            value={value || ''}
+            onChange={(e) => handleChange(q.id, e.target.value)}
+            className="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-zinc-700 resize-none"
+            placeholder={q.placeholder}
+          />
+        );
+      case 'radio':
+        return (
+          <div className="flex flex-wrap gap-4 mt-2">
+            {q.options?.map((option) => (
+              <label key={option} className={`flex-1 flex items-center justify-center p-4 rounded-xl border cursor-pointer transition-all ${value === option ? 'bg-blue-600/20 border-blue-500 text-white' : 'bg-zinc-950/50 border-zinc-800 text-zinc-400 hover:bg-zinc-900'}`}>
+                <input type="radio" name={q.id} value={option} className="hidden" required={q.required} onChange={(e) => handleChange(q.id, e.target.value)} />
+                <span className="font-medium text-lg">{option}</span>
+              </label>
+            ))}
+          </div>
+        );
+      case 'checkbox':
+        return (
+          <div className="flex items-start space-x-3 bg-zinc-950/30 p-4 rounded-xl border border-zinc-800/50">
+            <input 
+              type="checkbox" 
+              required={q.required}
+              id={q.id}
+              checked={value || false}
+              onChange={(e) => handleChange(q.id, e.target.checked)}
+              className="mt-1 w-5 h-5 rounded border-zinc-700 text-blue-600 focus:ring-blue-500/50 focus:ring-offset-zinc-900 bg-zinc-900"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <label htmlFor={q.id} className="text-sm text-zinc-400 leading-tight cursor-pointer">
+              {q.label}
+            </label>
+          </div>
+        );
+      case 'star':
+        return (
+          <div className="p-6 bg-zinc-950/40 rounded-2xl border border-zinc-800/50">
+            <label className="block text-center text-lg font-medium text-white mb-6">{q.label}</label>
+            <div className="flex justify-center space-x-2" onMouseLeave={() => handleRatingHover(q.id, 0)}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <div key={star} className="relative cursor-pointer w-12 h-12">
+                  <div 
+                    className="absolute left-0 top-0 w-1/2 h-full z-10"
+                    onMouseEnter={() => handleRatingHover(q.id, star - 0.5)}
+                    onClick={() => handleChange(q.id, star - 0.5)}
+                  />
+                  <div 
+                    className="absolute right-0 top-0 w-1/2 h-full z-10"
+                    onMouseEnter={() => handleRatingHover(q.id, star)}
+                    onClick={() => handleChange(q.id, star)}
+                  />
+                  <Star 
+                    className={`w-12 h-12 transition-all duration-200 ${
+                      (hoverRating[q.id] || value) >= star 
+                        ? 'text-yellow-400 fill-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]' 
+                        : (hoverRating[q.id] || value) >= star - 0.5
+                          ? 'text-yellow-400' 
+                          : 'text-zinc-700'
+                    }`} 
+                  />
+                  {(hoverRating[q.id] || value) >= star - 0.5 && (hoverRating[q.id] || value) < star && (
+                    <StarHalf className="w-12 h-12 text-yellow-400 fill-yellow-400 absolute top-0 left-0 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center bg-zinc-900/50 p-12 rounded-3xl border border-zinc-800 backdrop-blur-md"
+        >
+          <motion.div
+            initial={{ rotate: -180, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            className="w-24 h-24 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6 glow-border"
           >
-            Documentation
-          </a>
+            <Sparkles className="w-12 h-12 text-blue-400 glow-text" />
+          </motion.div>
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-cyan-300 text-transparent bg-clip-text">Awesome!</h1>
+          <p className="text-xl text-zinc-300">Your feedback has been beamed to the server.</p>
+          <button 
+            onClick={() => {
+              setIsSuccess(false);
+              setFormData({});
+            }}
+            className="mt-8 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-full transition-colors"
+          >
+            Submit Another
+          </button>
+        </motion.div>
+        
+        <div className="mt-12 text-zinc-500 text-sm">{branding.footerText}</div>
+      </div>
+    );
+  }
+
+  return (
+    <main className="min-h-screen p-4 md:p-8 flex flex-col items-center justify-center relative overflow-hidden">
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-2xl bg-zinc-900/40 backdrop-blur-xl rounded-3xl border border-zinc-800/50 p-8 md:p-12 shadow-2xl relative z-10 my-8"
+      >
+        <div className="text-center mb-10 flex flex-col items-center">
+          <img src={branding.logoPath} alt="Logo" className="h-12 mb-6 opacity-90 invert mix-blend-screen" onError={(e) => e.currentTarget.style.display = 'none'} />
+          <h1 className="text-3xl md:text-5xl font-bold mb-3 tracking-tight">{branding.eventName}</h1>
+          <p className="text-zinc-400 text-lg">{branding.description}</p>
         </div>
-      </main>
-    </div>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {questions.map((q) => (
+            <div key={q.id} className={q.type === 'star' || q.type === 'checkbox' ? '' : 'space-y-2'}>
+              {q.type !== 'star' && q.type !== 'checkbox' && (
+                <label className="text-sm font-medium text-zinc-300 uppercase tracking-wider">{q.label}</label>
+              )}
+              {renderField(q)}
+            </div>
+          ))}
+
+          <button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="w-full relative group flex items-center justify-center space-x-2 bg-white text-black font-bold text-lg py-4 px-8 rounded-xl hover:bg-zinc-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+          >
+            <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+            <span>{isSubmitting ? 'Sending...' : 'Submit Feedback'}</span>
+            {!isSubmitting && <Send className="w-5 h-5 ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
+          </button>
+        </form>
+      </motion.div>
+      
+      <div className="relative z-10 text-zinc-500 text-sm pb-8">{branding.footerText}</div>
+    </main>
   );
 }
