@@ -49,5 +49,8 @@ A production-grade, highly customizable feedback and event-registration server. 
    *The app will now be available across your network at `https://<YOUR-IP>:3000`. Users will need to click "Advanced -> Proceed" to bypass the self-signed certificate warning.*
 
 ## Customizing the Event
-To customize the logo, event name, and feedback questions, edit the configuration file located at:
+To customize the event name, questions, and footer, edit the configuration file located at:
 `src/config/feedback.config.ts`
+
+**Custom Logo Placement:**
+Drop your company/event logo file (e.g., `my-logo.png`) directly into the `public/` directory at the root of the project. Then, update the `logoPath` in `src/config/feedback.config.ts` to reference it (e.g., `logoPath: "/my-logo.png"`).
