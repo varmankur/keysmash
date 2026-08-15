@@ -1,14 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Download, Upload, Trophy, Check, Loader2 } from 'lucide-react';
+import { Download, Upload, Trophy, Check, Loader2, FileArchive, Image as ImageIcon, Video } from 'lucide-react';
 import { feedbackConfig } from '@/config/feedback.config';
+
+interface Media {
+  id: string;
+  type: string;
+  path: string;
+}
 
 interface Feedback {
   id: string;
+  studentId: string;
   answers: string; // JSON
   isWinner: boolean;
-  videoPath: string | null;
+  media: Media[];
   createdAt: string;
 }
 
@@ -16,6 +23,7 @@ export default function AdminDashboard() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [isExportingZip, setIsExportingZip] = useState(false);
 
   const { branding, questions } = feedbackConfig;
 
@@ -52,22 +60,22 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleVideoUpload = async (id: string, file: File) => {
-    if (!file) return;
+  const handleMediaUpload = async (id: string, files: FileList) => {
+    if (!files || files.length === 0) return;
     setUploadingId(id);
     const formData = new FormData();
-    formData.append('video', file);
+    Array.from(files).forEach((file) => formData.append('media', file));
     formData.append('feedbackId', id);
 
     try {
-      const res = await fetch('/api/admin/upload-video', {
+      const res = await fetch('/api/admin/upload-media', {
         method: 'POST',
         body: formData,
       });
       if (res.ok) {
         fetchFeedbacks();
       } else {
-        alert('Upload failed. The file might be too large or server error.');
+        alert('Upload failed. Server error or file too large.');
       }
     } catch (error) {
       alert('Upload error.');
@@ -76,8 +84,43 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleExport = () => {
+  const handleExportExcel = () => {
     window.open('/api/admin/export', '_blank');
+  };
+
+  const handleExportZip = async () => {
+    setIsExportingZip(true);
+    try {
+      const res = await fetch('/api/admin/export-zip');
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        const disposition = res.headers.get('Content-Disposition');
+        let filename = 'export.zip';
+        if (disposition && disposition.indexOf('filename=') !== -1) {
+            const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+            const matches = filenameRegex.exec(disposition);
+            if (matches != null && matches[1]) { 
+              filename = matches[1].replace(/['"]/g, '');
+            }
+        }
+        
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } else {
+        alert('Failed to connect to export server.');
+      }
+    } catch (error) {
+      alert('Export error.');
+    } finally {
+      setIsExportingZip(false);
+    }
   };
 
   if (isLoading) {
@@ -90,20 +133,30 @@ export default function AdminDashboard() {
         
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 mb-4 md:mb-0">
             <img src={branding.logoPath} alt="Logo" className="h-8 invert mix-blend-screen" onError={(e) => e.currentTarget.style.display = 'none'} />
             <div>
               <h1 className="text-2xl font-bold">Admin Dashboard</h1>
               <p className="text-zinc-400 text-sm">{branding.eventName} Feedback</p>
             </div>
           </div>
-          <button 
-            onClick={handleExport}
-            className="mt-4 md:mt-0 flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 px-6 py-2.5 rounded-xl transition-colors font-medium"
-          >
-            <Download className="w-4 h-4" />
-            <span>Export to Excel</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <button 
+              onClick={handleExportExcel}
+              className="flex items-center space-x-2 bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-600/50 px-4 py-2 rounded-xl transition-colors font-medium text-sm"
+            >
+              <Download className="w-4 h-4" />
+              <span>Export Excel</span>
+            </button>
+            <button 
+              onClick={handleExportZip}
+              disabled={isExportingZip}
+              className="flex items-center space-x-2 bg-green-600 hover:bg-green-500 px-5 py-2 rounded-xl transition-colors font-medium text-sm disabled:opacity-50"
+            >
+              {isExportingZip ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileArchive className="w-4 h-4" />}
+              <span>Export All Data (ZIP)</span>
+            </button>
+          </div>
         </div>
 
         {/* Table */}
@@ -111,16 +164,17 @@ export default function AdminDashboard() {
           <table className="w-full text-left border-collapse min-w-max">
             <thead>
               <tr className="bg-zinc-900/80 border-b border-zinc-800 text-zinc-400 text-sm uppercase tracking-wider">
+                <th className="p-4 font-medium">Student ID</th>
                 {questions.map((q) => (
                   <th key={q.id} className="p-4 font-medium">{q.label}</th>
                 ))}
                 <th className="p-4 font-medium text-center">Winner</th>
-                <th className="p-4 font-medium text-center">Video</th>
+                <th className="p-4 font-medium text-center">Media</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
               {feedbacks.length === 0 ? (
-                <tr><td colSpan={questions.length + 2} className="p-8 text-center text-zinc-500">No feedbacks yet.</td></tr>
+                <tr><td colSpan={questions.length + 3} className="p-8 text-center text-zinc-500">No feedbacks yet.</td></tr>
               ) : feedbacks.map((fb) => {
                 let parsedAnswers: Record<string, any> = {};
                 try {
@@ -129,6 +183,7 @@ export default function AdminDashboard() {
 
                 return (
                   <tr key={fb.id} className={`hover:bg-zinc-800/30 transition-colors ${fb.isWinner ? 'bg-blue-900/10' : ''}`}>
+                    <td className="p-4 text-sm font-mono text-blue-400">{fb.studentId}</td>
                     {questions.map((q) => (
                       <td key={q.id} className="p-4 text-sm text-zinc-300 max-w-[200px] truncate" title={parsedAnswers[q.id]?.toString()}>
                         {q.type === 'star' ? (
@@ -151,34 +206,37 @@ export default function AdminDashboard() {
                         <Trophy className="w-5 h-5" />
                       </button>
                     </td>
-                    <td className="p-4 text-center">
-                      {fb.videoPath ? (
-                        <a href={fb.videoPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center space-x-1 text-xs font-medium text-green-400 bg-green-400/10 px-3 py-1.5 rounded-full border border-green-400/20 hover:bg-green-400/20 transition-colors">
-                          <Check className="w-3 h-3" />
-                          <span>Uploaded</span>
-                        </a>
-                      ) : fb.isWinner ? (
-                        <div className="relative inline-block">
+                    <td className="p-4">
+                      <div className="flex flex-col items-center gap-2">
+                        {fb.media.length > 0 && (
+                          <div className="flex flex-wrap gap-1 justify-center max-w-[120px]">
+                            {fb.media.map(m => (
+                              <a key={m.id} href={m.path} target="_blank" rel="noopener noreferrer" className="p-1 bg-zinc-800 rounded hover:bg-zinc-700 transition-colors" title={m.type}>
+                                {m.type === 'video' ? <Video className="w-3 h-3 text-blue-400" /> : <ImageIcon className="w-3 h-3 text-green-400" />}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                        <div className="relative inline-block w-full max-w-[100px]">
                           <input 
                             type="file" 
-                            accept="video/*" 
+                            multiple
+                            accept="image/*,video/*" 
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                            title="Upload Testimonial Video"
+                            title="Upload Photos or Videos"
                             disabled={uploadingId === fb.id}
                             onChange={(e) => {
-                              if (e.target.files && e.target.files[0]) {
-                                handleVideoUpload(fb.id, e.target.files[0]);
+                              if (e.target.files && e.target.files.length > 0) {
+                                handleMediaUpload(fb.id, e.target.files);
                               }
                             }}
                           />
-                          <button disabled={uploadingId === fb.id} className="inline-flex items-center space-x-1 text-xs font-medium text-blue-400 bg-blue-400/10 px-3 py-1.5 rounded-full border border-blue-400/20 hover:bg-blue-400/20 transition-colors disabled:opacity-50">
+                          <button disabled={uploadingId === fb.id} className="w-full inline-flex items-center justify-center space-x-1 text-xs font-medium text-zinc-300 bg-zinc-800 px-3 py-1.5 rounded-full border border-zinc-700 hover:bg-zinc-700 transition-colors disabled:opacity-50">
                             {uploadingId === fb.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
-                            <span>Upload</span>
+                            <span>Add</span>
                           </button>
                         </div>
-                      ) : (
-                        <span className="text-xs text-zinc-600">-</span>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 );

@@ -11,7 +11,8 @@ export async function GET() {
 
   try {
     const feedbacks = await prisma.feedback.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      include: { media: true }
     });
 
     // Convert data to worksheeet
@@ -21,11 +22,14 @@ export async function GET() {
         answers = JSON.parse(fb.answers);
       } catch(e) {}
       
+      const mediaFiles = fb.media.map(m => m.path.split('/').pop()).join(', ');
+
       return {
         id: fb.id,
+        studentId: fb.studentId,
         createdAt: fb.createdAt,
         isWinner: fb.isWinner,
-        videoPath: fb.videoPath,
+        mediaFiles,
         ...answers
       };
     });

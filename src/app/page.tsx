@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Star, StarHalf, Sparkles, Send } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Star, StarHalf, Sparkles, Send, Menu, X, Bug, Shield } from 'lucide-react';
+import Link from 'next/link';
 import { feedbackConfig, Question } from '@/config/feedback.config';
 
 export default function Home() {
@@ -10,6 +11,13 @@ export default function Home() {
   const [hoverRating, setHoverRating] = useState<Record<string, number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Hamburger Menu & Bug Modal state
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isBugModalOpen, setIsBugModalOpen] = useState(false);
+  const [bugDescription, setBugDescription] = useState('');
+  const [bugReporter, setBugReporter] = useState('');
+  const [isSubmittingBug, setIsSubmittingBug] = useState(false);
 
   const { branding, questions } = feedbackConfig;
 
@@ -41,6 +49,30 @@ export default function Home() {
       alert('Network error, please try again!');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleBugSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingBug(true);
+    try {
+      const res = await fetch('/api/bug', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: bugDescription, reporter: bugReporter }),
+      });
+      if (res.ok) {
+        setIsBugModalOpen(false);
+        setBugDescription('');
+        setBugReporter('');
+        alert('Bug reported successfully!');
+      } else {
+        alert('Failed to report bug.');
+      }
+    } catch (error) {
+      alert('Network error.');
+    } finally {
+      setIsSubmittingBug(false);
     }
   };
 
@@ -184,6 +216,118 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-4 md:p-8 flex flex-col items-center justify-center relative overflow-hidden">
+      
+      {/* Hamburger Button */}
+      <button 
+        onClick={() => setIsMenuOpen(true)}
+        className="absolute top-6 right-6 z-50 p-3 bg-zinc-900/80 border border-zinc-800 rounded-full hover:bg-zinc-800 transition-colors"
+      >
+        <Menu className="w-6 h-6 text-white" />
+      </button>
+
+      {/* Slide-out Menu Panel */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMenuOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-full w-64 bg-zinc-950 border-l border-zinc-800 z-50 p-6 flex flex-col shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-white font-bold text-lg">Menu</h2>
+                <button onClick={() => setIsMenuOpen(false)} className="p-2 bg-zinc-900 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <Link href="/admin/login" className="flex items-center space-x-3 w-full p-4 rounded-xl bg-blue-900/20 text-blue-400 hover:bg-blue-900/40 border border-blue-900/50 transition-colors">
+                  <Shield className="w-5 h-5" />
+                  <span className="font-medium">Admin Login</span>
+                </Link>
+                <button 
+                  onClick={() => { setIsMenuOpen(false); setIsBugModalOpen(true); }}
+                  className="flex items-center space-x-3 w-full p-4 rounded-xl bg-red-900/20 text-red-400 hover:bg-red-900/40 border border-red-900/50 transition-colors"
+                >
+                  <Bug className="w-5 h-5" />
+                  <span className="font-medium">Report a Bug</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Bug Report Modal */}
+      <AnimatePresence>
+        {isBugModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsBugModalOpen(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative bg-zinc-900 border border-zinc-800 p-8 rounded-2xl w-full max-w-md shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-white flex items-center">
+                  <Bug className="w-5 h-5 mr-2 text-red-500" /> Report an Anomaly
+                </h2>
+                <button onClick={() => setIsBugModalOpen(false)} className="text-zinc-500 hover:text-white">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <form onSubmit={handleBugSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Description</label>
+                  <textarea 
+                    required
+                    rows={4}
+                    value={bugDescription}
+                    onChange={(e) => setBugDescription(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white focus:ring-2 focus:ring-red-500/50 outline-none resize-none"
+                    placeholder="What went wrong?"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Your Name (Optional)</label>
+                  <input 
+                    type="text"
+                    value={bugReporter}
+                    onChange={(e) => setBugReporter(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white focus:ring-2 focus:ring-red-500/50 outline-none"
+                    placeholder="Anonymous"
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  disabled={isSubmittingBug}
+                  className="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-3 rounded-xl transition-colors disabled:opacity-50"
+                >
+                  {isSubmittingBug ? 'Submitting...' : 'Submit Bug Report'}
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
 

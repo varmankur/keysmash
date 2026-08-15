@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "start:https": "NODE_ENV=production node server.js",
+    "lint": "next lint"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

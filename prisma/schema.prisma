@@ -12,8 +12,25 @@ datasource db {
 
 model Feedback {
   id        String   @id @default(uuid())
+  studentId String   @unique
   answers   String   // JSON string of { [questionId]: value }
   isWinner  Boolean  @default(false)
-  videoPath String?
+  media     Media[]
   createdAt DateTime @default(now())
+}
+
+model Media {
+  id         String   @id @default(uuid())
+  feedbackId String
+  feedback   Feedback @relation(fields: [feedbackId], references: [id])
+  type       String   // "photo" or "video"
+  path       String
+  createdAt  DateTime @default(now())
+}
+
+model BugReport {
+  id          String   @id @default(uuid())
+  description String
+  reporter    String?
+  createdAt   DateTime @default(now())
 }

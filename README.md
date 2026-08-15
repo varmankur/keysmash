@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Generic Feedback Server
 
-## Getting Started
+A production-grade, highly customizable feedback and event-registration server. Built with Next.js, Prisma, and TailwindCSS. It supports multi-media uploads, anomaly/bug reporting, secure super-admin access, and fully customizable configuration via code.
 
-First, run the development server:
+## Key Features
+- **Config-Driven**: Easily change the branding (logos, names) and questions without changing database schema.
+- **Multi-Media Support**: Users and admins can attach multiple photos/videos to feedback entries.
+- **Top-Secret Daimon Tier**: Dedicated Overwatch dashboard for super-admins to track live anomalies and bug reports.
+- **Production HTTPS Ready**: Serves locally over HTTPS to securely handle data across mobile phones and laptops on the same Wi-Fi network.
+- **Data Export**: Bundle all your data (Excel + Photos + Videos) into a single zip file with one click.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Quickstart
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/varmankur/generic-feedback-app.git
+   cd generic-feedback-app
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. **Set up your environment:**
+   Copy the example environment file and update the credentials as needed:
+   ```bash
+   cp .env.example .env
+   ```
 
-## Learn More
+4. **Initialize the database:**
+   ```bash
+   npx prisma db push
+   npx prisma generate
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+5. **Generate Local SSL Certificates:**
+   Since the server runs on HTTPS for local network securely, you need to generate self-signed certificates:
+   ```bash
+   mkdir -p certs
+   openssl req -x509 -newkey rsa:4096 -keyout certs/key.pem -out certs/cert.pem -days 365 -nodes -subj '/CN=localhost'
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+6. **Build and Run (Production HTTPS):**
+   ```bash
+   npm run build
+   npm run start:https
+   ```
+   *The app will now be available across your network at `https://<YOUR-IP>:3000`. Users will need to click "Advanced -> Proceed" to bypass the self-signed certificate warning.*
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Customizing the Event
+To customize the logo, event name, and feedback questions, edit the configuration file located at:
+`src/config/feedback.config.ts`

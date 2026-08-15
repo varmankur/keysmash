@@ -10,7 +10,8 @@ export async function GET() {
 
   try {
     const feedbacks = await prisma.feedback.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      include: { media: true }
     });
     return NextResponse.json({ feedbacks });
   } catch (error) {
