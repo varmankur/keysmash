@@ -6,11 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "start:https": "NODE_ENV=production node server.js",
+    "start:https": "cross-env NODE_ENV=production node server.js",
     "lint": "next lint"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "cross-env": "^10.1.0",
     "formidable": "^3.5.4",
     "framer-motion": "^13.1.0",
     "jsonwebtoken": "^9.0.3",
