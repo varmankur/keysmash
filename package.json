@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "prestart:https": "node scripts/generate-certs.js",
+    "prestart:https": "node scripts/prestart.js",
     "start:https": "cross-env NODE_ENV=production node server.js",
     "lint": "next lint"
   },
