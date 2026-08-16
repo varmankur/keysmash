@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "prestart:https": "node scripts/generate-certs.js",
     "start:https": "cross-env NODE_ENV=production node server.js",
     "lint": "next lint"
   },
@@ -20,6 +21,7 @@
     "prisma": "^5.22.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "selfsigned": "^5.5.0",
     "sqlite3": "^6.0.1",
     "xlsx": "^0.18.5"
   },

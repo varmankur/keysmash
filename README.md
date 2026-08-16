@@ -34,19 +34,12 @@ A production-grade, highly customizable feedback and event-registration server. 
    npx prisma generate
    ```
 
-5. **Generate Local SSL Certificates:**
-   Since the server runs on HTTPS for local network securely, you need to generate self-signed certificates:
-   ```bash
-   mkdir -p certs
-   openssl req -x509 -newkey rsa:4096 -keyout certs/key.pem -out certs/cert.pem -days 365 -nodes -subj '/CN=localhost'
-   ```
-
-6. **Build and Run (Production HTTPS):**
+5. **Build and Run (Production HTTPS):**
    ```bash
    npm run build
    npm run start:https
    ```
-   *The app will now be available across your network at `https://<YOUR-IP>:3000`. Users will need to click "Advanced -> Proceed" to bypass the self-signed certificate warning.*
+   *The app will automatically generate local self-signed SSL certificates for you on startup. It will be available across your network at `https://<YOUR-IP>:3000`. Users will need to click "Advanced -> Proceed" to bypass the self-signed certificate warning.*
 
 ## Customizing the Event
 To customize the event name, questions, and footer, edit the configuration file located at:
