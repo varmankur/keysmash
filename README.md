@@ -13,8 +13,8 @@ A production-grade, highly customizable feedback and event-registration server. 
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/varmankur/generic-feedback-app.git
-   cd generic-feedback-app
+   git clone https://github.com/varmankur/keysmash.git
+   cd keysmash
    ```
 
 2. **Install dependencies:**

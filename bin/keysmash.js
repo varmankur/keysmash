@@ -12,7 +12,7 @@ async function main() {
     console.log('Initializing a new Key Smash server at:', targetDir);
     console.log('Cloning repository...');
     try {
-      execSync(`git clone https://github.com/varmankur/generic-feedback-app.git keysmash-server`, { stdio: 'inherit' });
+      execSync(`git clone https://github.com/varmankur/keysmash.git keysmash-server`, { stdio: 'inherit' });
       
       console.log('Installing dependencies...');
       execSync('npm install', { cwd: targetDir, stdio: 'inherit' });
