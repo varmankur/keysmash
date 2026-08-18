@@ -20,7 +20,7 @@ export function BugModal() {
       setIsOpen(false);
       setDesc('');
       setReporter('');
-      alert('Bug reported successfully. Our daemons are on it.');
+      alert('Bug reported successfully. Our daimons are on it.');
     } catch (e) {
       alert('Failed to report bug');
     } finally {
