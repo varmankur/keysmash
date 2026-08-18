@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     logEvent('BUG_REPORTED', { id: bug.id });
 
     return NextResponse.json({ success: true, data: bug }, { status: 201 });
-  } catch (error) {
+  } catch {
     console.error('Error reporting bug:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

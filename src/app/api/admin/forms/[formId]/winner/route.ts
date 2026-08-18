@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 
-export async function POST(request: Request, { params }: { params: { formId: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ formId: string }> }) {
+  const resolvedParams = await params;
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -13,7 +14,7 @@ export async function POST(request: Request, { params }: { params: { formId: str
     
     // Verify ownership of the feedback via the form
     const form = await prisma.form.findFirst({
-      where: { id: params.formId, adminId: session.id }
+      where: { id: resolvedParams.formId, adminId: session.id }
     });
 
     if (!form) return NextResponse.json({ error: 'Unauthorized or not found' }, { status: 403 });
@@ -24,7 +25,7 @@ export async function POST(request: Request, { params }: { params: { formId: str
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

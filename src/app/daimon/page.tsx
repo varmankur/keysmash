@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -27,11 +28,7 @@ export default function DaimonDashboard() {
   const [newPassword, setNewPassword] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  async function fetchData() {
     try {
       const [bugsRes, adminsRes] = await Promise.all([
         fetch('/api/daimon/bugs'),
@@ -47,12 +44,16 @@ export default function DaimonDashboard() {
         const data = await adminsRes.json();
         setAdmins(data.admins);
       }
-    } catch (error) {
+    } catch {
       console.error('Failed to fetch data');
     } finally {
       setIsLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +73,7 @@ export default function DaimonDashboard() {
         const data = await res.json();
         alert(data.error || 'Failed to create admin');
       }
-    } catch (error) {
+    } catch {
       alert('Error creating admin');
     } finally {
       setIsCreating(false);

@@ -6,13 +6,13 @@ import { mkdir, writeFile, copyFile, rm, readFile as fsReadFile } from 'fs/promi
 import { join } from 'path';
 import { execSync } from 'child_process';
 
-export async function GET(request: Request, { params }: { params: { formId: string } }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ formId: string }> }) {
+  const resolvedParams = await params;
+  const formId = resolvedParams.formId;
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
-  const formId = params.formId;
 
   try {
     const form = await prisma.form.findFirst({
@@ -32,7 +32,7 @@ export async function GET(request: Request, { params }: { params: { formId: stri
     const exportsDir = join(process.cwd(), 'public', 'exports');
     try {
       await mkdir(exportsDir, { recursive: true });
-    } catch (e) {}
+    } catch {}
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const eventName = form.slug;
@@ -52,7 +52,7 @@ export async function GET(request: Request, { params }: { params: { formId: stri
       let answers = {};
       try {
         answers = JSON.parse(fb.answers);
-      } catch(e) {}
+      } catch {}
       
       const mediaFiles = fb.media.map(m => m.path.split('/').pop()).join(', ');
 
@@ -83,7 +83,7 @@ export async function GET(request: Request, { params }: { params: { formId: stri
         if (filename) {
           try {
             await copyFile(join(uploadsDir, filename), join(tempMediaDirPath, filename));
-          } catch(e) {
+          } catch {
             console.error('Failed to copy file:', filename);
           }
         }
@@ -109,7 +109,7 @@ export async function GET(request: Request, { params }: { params: { formId: stri
         'Content-Disposition': `attachment; filename="${zipName}"`,
       },
     });
-  } catch (error) {
+  } catch {
     console.error('Error generating ZIP:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

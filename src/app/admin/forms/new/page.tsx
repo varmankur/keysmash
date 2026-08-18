@@ -68,7 +68,7 @@ export default function FormBuilder() {
       } else {
         setError(data.error || 'Failed to save form');
       }
-    } catch (err) {
+    } catch {
       setError('Connection failed');
     } finally {
       setIsSaving(false);

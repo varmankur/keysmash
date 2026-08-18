@@ -13,7 +13,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     });
     return NextResponse.json({ bugs });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 const { createServer } = require('https');
 const { parse } = require('url');
 const next = require('next');

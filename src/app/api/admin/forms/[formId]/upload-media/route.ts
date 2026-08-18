@@ -4,7 +4,8 @@ import { getSession } from '@/lib/auth';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 
-export async function POST(request: Request, { params }: { params: { formId: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ formId: string }> }) {
+  const resolvedParams = await params;
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -20,20 +21,20 @@ export async function POST(request: Request, { params }: { params: { formId: str
     }
 
     const form = await prisma.form.findFirst({
-      where: { id: params.formId, adminId: session.id }
+      where: { id: resolvedParams.formId, adminId: session.id }
     });
 
     if (!form) return NextResponse.json({ error: 'Unauthorized or not found' }, { status: 403 });
 
     const feedback = await prisma.feedback.findUnique({ where: { id: feedbackId } });
-    if (!feedback || feedback.formId !== params.formId) {
+    if (!feedback || feedback.formId !== resolvedParams.formId) {
       return NextResponse.json({ error: 'Feedback not found' }, { status: 404 });
     }
 
     const uploadsDir = join(process.cwd(), 'public', 'uploads');
     try {
       await mkdir(uploadsDir, { recursive: true });
-    } catch (e) {}
+    } catch {}
 
     let index = 1;
     for (const file of mediaFiles) {
@@ -60,7 +61,7 @@ export async function POST(request: Request, { params }: { params: { formId: str
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     console.error('Upload error:', error);
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
   }

@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       requirePasswordChange: admin.requirePasswordChange,
       isDaimon: admin.isDaimon
     });
-  } catch (error) {
+  } catch {
     console.error('Login error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

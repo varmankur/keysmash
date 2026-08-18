@@ -42,7 +42,7 @@ export default function ChangePassword() {
       } else {
         setError(data.error || 'Failed to change password');
       }
-    } catch (err) {
+    } catch {
       setError('Connection failed');
     } finally {
       setLoading(false);

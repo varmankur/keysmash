@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');

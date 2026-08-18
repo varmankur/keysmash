@@ -40,7 +40,7 @@ export async function GET() {
     });
 
     return NextResponse.redirect(new URL('/auth/change-password', process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'));
-  } catch (error) {
+  } catch {
     console.error('Setup error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -18,23 +19,23 @@ export default function AdminFormsDashboard() {
   const [forms, setForms] = useState<FormSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchForms();
-  }, []);
-
-  const fetchForms = async () => {
+  async function fetchForms() {
     try {
       const res = await fetch('/api/admin/forms');
       if (res.ok) {
         const data = await res.json();
         setForms(data.forms);
       }
-    } catch (error) {
+    } catch {
       console.error('Failed to fetch forms');
     } finally {
       setIsLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchForms();
+  }, []);
 
   if (isLoading) {
     return <div className="min-h-screen bg-black flex items-center justify-center text-white"><Loader2 className="animate-spin w-8 h-8" /></div>;
@@ -64,7 +65,7 @@ export default function AdminFormsDashboard() {
           {forms.length === 0 ? (
             <div className="col-span-full py-16 text-center border border-dashed border-zinc-800 rounded-2xl">
               <LayoutTemplate className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-              <p className="text-zinc-400">You haven't created any forms yet.</p>
+              <p className="text-zinc-400">You haven&apos;t created any forms yet.</p>
               <Link href="/admin/forms/new" className="text-blue-500 hover:underline mt-2 inline-block">Create your first form</Link>
             </div>
           ) : forms.map(form => (

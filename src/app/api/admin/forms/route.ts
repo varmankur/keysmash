@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json({ forms });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, formId: form.id });
-  } catch (error) {
+  } catch {
     console.error('Create form error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

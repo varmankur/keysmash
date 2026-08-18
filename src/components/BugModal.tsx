@@ -21,7 +21,7 @@ export function BugModal() {
       setDesc('');
       setReporter('');
       alert('Bug reported successfully. Our daimons are on it.');
-    } catch (e) {
+    } catch {
       alert('Failed to report bug');
     } finally {
       setIsSubmitting(false);

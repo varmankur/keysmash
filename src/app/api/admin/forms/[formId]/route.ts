@@ -2,12 +2,13 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 
-export async function GET(request: Request, { params }: { params: { formId: string } }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ formId: string }> }) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const formId = params.formId;
+    const resolvedParams = await params;
+    const formId = resolvedParams.formId;
 
     const form = await prisma.form.findFirst({
       where: { id: formId, adminId: session.id },
@@ -24,17 +25,18 @@ export async function GET(request: Request, { params }: { params: { formId: stri
     }
 
     return NextResponse.json({ form });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { formId: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ formId: string }> }) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const formId = params.formId;
+    const resolvedParams = await params;
+    const formId = resolvedParams.formId;
     
     // Check ownership
     const form = await prisma.form.findFirst({
@@ -48,7 +50,7 @@ export async function DELETE(request: Request, { params }: { params: { formId: s
     await prisma.form.delete({ where: { id: formId } });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

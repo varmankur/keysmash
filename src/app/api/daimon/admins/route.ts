@@ -32,13 +32,13 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, admin: { id: admin.id, username: admin.username } });
-  } catch (error) {
+  } catch {
     console.error('Create admin error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     const session = await getDaimonSession();
     if (!session) {
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json({ admins });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

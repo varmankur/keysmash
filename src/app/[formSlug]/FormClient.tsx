@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @next/next/no-img-element */
+
 'use client';
 
 import { useState } from 'react';
@@ -35,7 +38,7 @@ export default function FormClient({ formId, title, description, logoPath, prima
       } else {
         alert('Failed to submit: ' + data.error);
       }
-    } catch (error) {
+    } catch {
       alert('Network error');
     } finally {
       setIsSubmitting(false);

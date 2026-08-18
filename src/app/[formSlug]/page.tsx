@@ -15,7 +15,7 @@ export default async function DynamicFormPage({ params }: { params: Promise<{ fo
   let questions = [];
   try {
     questions = JSON.parse(form.questions);
-  } catch(e) {}
+  } catch {}
 
   return (
     <FormClient 

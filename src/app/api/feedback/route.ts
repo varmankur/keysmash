@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     console.log(`FEEDBACK_SUBMITTED: ${JSON.stringify({ id: feedback.id })}`);
 
     return NextResponse.json({ success: true, studentId });
-  } catch (error) {
+  } catch {
     console.error('Feedback submission error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

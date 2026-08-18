@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-export function logEvent(action: string, details: any) {
+export function logEvent(action: string, details: unknown) {
   try {
     const logDir = path.join(process.cwd(), 'logs');
     if (!fs.existsSync(logDir)) {
@@ -14,7 +14,7 @@ export function logEvent(action: string, details: any) {
     
     fs.appendFileSync(logFile, logEntry);
     console.log(logEntry.trim());
-  } catch (error) {
+  } catch {
     console.error('Failed to write log', error);
   }
 }

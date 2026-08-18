@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import * as xlsx from 'xlsx';
 
-export async function GET(request: Request, { params }: { params: { formId: string } }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ formId: string }> }) {
+  const resolvedParams = await params;
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -11,7 +12,7 @@ export async function GET(request: Request, { params }: { params: { formId: stri
 
   try {
     const form = await prisma.form.findFirst({
-      where: { id: params.formId, adminId: session.id },
+      where: { id: resolvedParams.formId, adminId: session.id },
       include: {
         feedbacks: {
           orderBy: { createdAt: 'desc' },
@@ -26,7 +27,7 @@ export async function GET(request: Request, { params }: { params: { formId: stri
       let answers = {};
       try {
         answers = JSON.parse(fb.answers);
-      } catch(e) {}
+      } catch {}
       
       const mediaFiles = fb.media.map(m => m.path.split('/').pop()).join(', ');
 
@@ -53,7 +54,7 @@ export async function GET(request: Request, { params }: { params: { formId: stri
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
