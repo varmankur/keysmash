@@ -2,6 +2,9 @@
   "name": "keysmash",
   "version": "1.0.0",
   "private": false,
+  "files": [
+    "bin"
+  ],
   "bin": {
     "keysmash": "./bin/keysmash.js"
   },
