@@ -5,12 +5,14 @@
   "files": [
     "bin",
     ".next",
-    "public",
-    "prisma",
+    "public/*.svg",
+    "public/*.ico",
+    "public/exports/.gitkeep",
+    "public/uploads/.gitkeep",
+    "prisma/schema.prisma",
     "scripts",
     "server.js",
-    "next.config.ts",
-    "tsconfig.json"
+    "next.config.ts"
   ],
   "bin": {
     "keysmash": "./bin/keysmash.js"
