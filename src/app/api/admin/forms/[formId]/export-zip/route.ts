@@ -1,23 +1,33 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAdminSession } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import * as xlsx from 'xlsx';
 import { mkdir, writeFile, copyFile, rm, readFile as fsReadFile } from 'fs/promises';
 import { join } from 'path';
-import { feedbackConfig } from '@/config/feedback.config';
 import { execSync } from 'child_process';
 
-export async function GET() {
-  const session = await getAdminSession();
+export async function GET(request: Request, { params }: { params: { formId: string } }) {
+  const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const formId = params.formId;
+
   try {
-    const feedbacks = await prisma.feedback.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: { media: true }
+    const form = await prisma.form.findFirst({
+      where: { id: formId, adminId: session.id },
+      include: {
+        feedbacks: {
+          orderBy: { createdAt: 'desc' },
+          include: { media: true }
+        }
+      }
     });
+
+    if (!form) return NextResponse.json({ error: 'Form not found' }, { status: 404 });
+
+    const feedbacks = form.feedbacks;
 
     const exportsDir = join(process.cwd(), 'public', 'exports');
     try {
@@ -25,7 +35,7 @@ export async function GET() {
     } catch (e) {}
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const eventName = feedbackConfig.branding.eventName.replace(/\s+/g, '_');
+    const eventName = form.slug;
     const zipName = `${eventName}_${timestamp}.zip`;
     const zipPath = join(exportsDir, zipName);
     

@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,19 +7,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Admin {
+  id                    String   @id @default(uuid())
+  username              String   @unique
+  passwordHash          String
+  isDaimon              Boolean  @default(false)
+  requirePasswordChange Boolean  @default(true)
+  forms                 Form[]
+  createdAt             DateTime @default(now())
+}
+
+model Form {
+  id           String     @id @default(uuid())
+  adminId      String
+  admin        Admin      @relation(fields: [adminId], references: [id])
+  slug         String     @unique // e.g., "tcs-workshop"
+  title        String
+  description  String?
+  logoPath     String?
+  primaryColor String     @default("#3b82f6") // default blue
+  questions    String     // JSON representation of questions array
+  feedbacks    Feedback[]
+  createdAt    DateTime   @default(now())
+}
+
 model Feedback {
   id        String   @id @default(uuid())
-  studentId String   @unique
+  formId    String
+  form      Form     @relation(fields: [formId], references: [id])
+  studentId String   
   answers   String   // JSON string of { [questionId]: value }
   isWinner  Boolean  @default(false)
   media     Media[]
   createdAt DateTime @default(now())
+
+  @@unique([formId, studentId]) // Ensure studentId is unique per form
 }
 
 model Media {
   id         String   @id @default(uuid())
   feedbackId String
-  feedback   Feedback @relation(fields: [feedbackId], references: [id])
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
   type       String   // "photo" or "video"
   path       String
   createdAt  DateTime @default(now())

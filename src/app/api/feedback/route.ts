@@ -1,27 +1,39 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { logEvent } from '@/lib/logger';
+import crypto from 'crypto';
+
+function generateStudentId() {
+  const prefix = "STU";
+  const randomStr = crypto.randomBytes(3).toString('hex').toUpperCase(); // 6 chars
+  return `${prefix}-${randomStr}`;
+}
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    
-    // Generate unique student ID (e.g. STU-A1B2C3)
-    const studentId = `STU-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    const { formId, answers } = await request.json();
 
-    // Save dynamic answers
+    if (!formId || !answers) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const form = await prisma.form.findUnique({ where: { id: formId } });
+    if (!form) return NextResponse.json({ error: 'Form not found' }, { status: 404 });
+
+    const studentId = generateStudentId();
+
     const feedback = await prisma.feedback.create({
       data: {
+        formId,
         studentId,
-        answers: JSON.stringify(body),
-      },
+        answers: JSON.stringify(answers)
+      }
     });
 
-    logEvent('FEEDBACK_SUBMITTED', { id: feedback.id });
+    console.log(`FEEDBACK_SUBMITTED: ${JSON.stringify({ id: feedback.id })}`);
 
-    return NextResponse.json({ success: true, data: feedback }, { status: 201 });
+    return NextResponse.json({ success: true, studentId });
   } catch (error) {
-    console.error('Error saving feedback:', error);
+    console.error('Feedback submission error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

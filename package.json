@@ -1,7 +1,10 @@
 {
-  "name": "temp-app",
-  "version": "0.1.0",
-  "private": true,
+  "name": "keysmash",
+  "version": "1.0.0",
+  "private": false,
+  "bin": {
+    "keysmash": "./bin/keysmash.js"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,6 +15,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "bcryptjs": "^3.0.3",
     "cross-env": "^10.1.0",
     "formidable": "^3.5.4",
     "framer-motion": "^13.1.0",
@@ -27,6 +31,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
     "@types/formidable": "^3.5.1",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
