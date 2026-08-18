@@ -1,15 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get('file') as File | null;
+    const file = formData.get('file');
     const feedbackId = formData.get('feedbackId') as string | null;
 
-    if (!file || !feedbackId) {
+    if (!file || typeof file === 'string' || !feedbackId) {
       return NextResponse.json({ error: 'Missing file or feedbackId' }, { status: 400 });
     }
 

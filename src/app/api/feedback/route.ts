@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 
@@ -8,7 +8,7 @@ function generateStudentId() {
   return `${prefix}-${randomStr}`;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { formId, answers } = await request.json();
 
