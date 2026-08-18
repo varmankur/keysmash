@@ -55,7 +55,12 @@ async function main() {
 
   console.log('\n🚀 Booting up Key Smash Daemon...\n');
   try {
-    execSync('npm run start:https', { cwd: targetDir, stdio: 'inherit' });
+    const useHttps = process.env.DISABLE_HTTPS !== 'true';
+    const startCmd = useHttps ? 'npm run start:https' : 'npm run start';
+    if (!useHttps) {
+      console.log('⚠️ Running in standard HTTP mode (DISABLE_HTTPS=true). Camera APIs may not work unless behind a proxy.');
+    }
+    execSync(startCmd, { cwd: targetDir, stdio: 'inherit' });
   } catch (e) {
     console.log('\nKey Smash stopped.');
   }

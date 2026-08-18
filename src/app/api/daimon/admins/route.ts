@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, admin: { id: admin.id, username: admin.username } });
   } catch {
-    console.error('Create admin error:', error);
+    console.error('Create admin error:');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

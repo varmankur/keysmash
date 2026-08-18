@@ -62,7 +62,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ for
 
     return NextResponse.json({ success: true });
   } catch {
-    console.error('Upload error:', error);
+    console.error('Upload error:');
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
   }
 }

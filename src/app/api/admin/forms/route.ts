@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, formId: form.id });
   } catch {
-    console.error('Create form error:', error);
+    console.error('Create form error:');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

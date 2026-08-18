@@ -15,6 +15,6 @@ export function logEvent(action: string, details: unknown) {
     fs.appendFileSync(logFile, logEntry);
     console.log(logEntry.trim());
   } catch {
-    console.error('Failed to write log', error);
+    console.error('Failed to write log');
   }
 }

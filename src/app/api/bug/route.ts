@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data: bug }, { status: 201 });
   } catch {
-    console.error('Error reporting bug:', error);
+    console.error('Error reporting bug:');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

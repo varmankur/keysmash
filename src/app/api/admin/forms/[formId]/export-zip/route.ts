@@ -110,7 +110,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ for
       },
     });
   } catch {
-    console.error('Error generating ZIP:', error);
+    console.error('Error generating ZIP:');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

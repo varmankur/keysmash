@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, isDaimon: session.isDaimon });
   } catch {
-    console.error('Change password error:', error);
+    console.error('Change password error:');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

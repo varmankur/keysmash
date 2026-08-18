@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { BugModal } from '@/components/BugModal';
+import { CameraCapture } from '@/components/CameraCapture';
 
 interface FormClientProps {
   formId: string;
@@ -18,6 +19,7 @@ interface FormClientProps {
 
 export default function FormClient({ formId, title, description, logoPath, primaryColor, questions }: FormClientProps) {
   const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [mediaFiles, setMediaFiles] = useState<Record<string, File>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
 
@@ -33,7 +35,17 @@ export default function FormClient({ formId, title, description, logoPath, prima
       });
       
       const data = await res.json();
-      if (res.ok) {
+      if (res.ok && data.feedbackId) {
+        // Upload media files if any
+        for (const [qId, file] of Object.entries(mediaFiles)) {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('feedbackId', data.feedbackId);
+          await fetch('/api/feedback/media', {
+            method: 'POST',
+            body: formData
+          });
+        }
         setSubmittedId(data.studentId);
       } else {
         alert('Failed to submit: ' + data.error);
@@ -128,10 +140,32 @@ export default function FormClient({ formId, title, description, logoPath, prima
                     id={q.id}
                     required={q.required}
                     className="w-6 h-6 rounded border-zinc-700"
-                    checked={answers[q.id] || false}
+                    checked={(answers[q.id] as boolean) || false}
                     onChange={e => setAnswers({...answers, [q.id]: e.target.checked})}
                   />
                   <label htmlFor={q.id} className="text-zinc-300 cursor-pointer flex-1">Yes, I agree</label>
+                </div>
+              )}
+
+              {(q.type === 'photo' || q.type === 'video') && (
+                <div className="mt-4">
+                  <CameraCapture 
+                    id={q.id}
+                    mode={q.type}
+                    primaryColor={primaryColor}
+                    onCapture={(file) => {
+                      if (file) {
+                        setMediaFiles(prev => ({ ...prev, [q.id]: file }));
+                      } else {
+                        const newFiles = { ...mediaFiles };
+                        delete newFiles[q.id];
+                        setMediaFiles(newFiles);
+                      }
+                    }}
+                  />
+                  {q.required && !mediaFiles[q.id] && (
+                    <p className="text-red-500 text-sm mt-2">This media is required.</p>
+                  )}
                 </div>
               )}
             </div>
@@ -139,8 +173,8 @@ export default function FormClient({ formId, title, description, logoPath, prima
 
           <button 
             type="submit" 
-            disabled={isSubmitting}
-            className="w-full text-black font-bold p-4 rounded-2xl transition-all hover:opacity-90 flex justify-center items-center gap-2 mt-8"
+            disabled={isSubmitting || questions.some(q => q.required && (q.type === 'photo' || q.type === 'video') && !mediaFiles[q.id])}
+            className="w-full text-black font-bold p-4 rounded-2xl transition-all hover:opacity-90 flex justify-center items-center gap-2 mt-8 disabled:opacity-50"
             style={{ backgroundColor: primaryColor }}
           >
             {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Submit Feedback'}

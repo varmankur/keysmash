@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 interface QuestionDef {
   id: string;
-  type: 'text' | 'textarea' | 'star' | 'checkbox';
+  type: 'text' | 'textarea' | 'star' | 'checkbox' | 'photo' | 'video';
   label: string;
   required: boolean;
 }
@@ -209,6 +209,12 @@ export default function FormBuilder() {
                 </button>
                 <button onClick={() => addQuestion('checkbox')} className="flex items-center text-sm bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg transition-colors border border-zinc-700">
                   <Plus className="w-4 h-4 mr-2 text-blue-500" /> Checkbox
+                </button>
+                <button onClick={() => addQuestion('photo')} className="flex items-center text-sm bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg transition-colors border border-zinc-700">
+                  <Plus className="w-4 h-4 mr-2 text-purple-500" /> Photo Upload
+                </button>
+                <button onClick={() => addQuestion('video')} className="flex items-center text-sm bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg transition-colors border border-zinc-700">
+                  <Plus className="w-4 h-4 mr-2 text-pink-500" /> Video Record
                 </button>
               </div>
 

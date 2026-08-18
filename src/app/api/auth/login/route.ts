@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       isDaimon: admin.isDaimon
     });
   } catch {
-    console.error('Login error:', error);
+    console.error('Login error:');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
