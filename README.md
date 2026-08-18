@@ -1,49 +1,54 @@
-# Generic Feedback Server
+# Key Smash (@lab39/keysmash)
 
-A production-grade, highly customizable feedback and event-registration server. Built with Next.js, Prisma, and TailwindCSS. It supports multi-media uploads, anomaly/bug reporting, secure super-admin access, and fully customizable configuration via code.
+A proprietary, fully self-hosted web engine for creating dynamic, brand-customizable feedback forms on your private network or server. Designed for enterprise events, workshops, and closed networks.
 
-## Key Features
-- **Config-Driven**: Easily change the branding (logos, names) and questions without changing database schema.
-- **Multi-Media Support**: Users and admins can attach multiple photos/videos to feedback entries.
-- **Top-Secret Daimon Tier**: Dedicated Overwatch dashboard for super-admins to track live anomalies and bug reports.
-- **Production HTTPS Ready**: Serves locally over HTTPS to securely handle data across mobile phones and laptops on the same Wi-Fi network.
-- **Data Export**: Bundle all your data (Excel + Photos + Videos) into a single zip file with one click.
+## Features
 
-## Quickstart
+- **No Cloud Required**: 100% self-hosted on your local network or server. Data never leaves your machine.
+- **Daimon Admin Dashboard**: A sleek, protected control panel to manage multiple forms, view submissions, and export data.
+- **Rich Media Support**: Native browser integration for students to submit photo and video feedback (directly from their mobile phones).
+- **Brand Customization**: Tweak form logos, primary colors, and descriptions on the fly.
+- **Zero Configuration**: Built-in SQLite database automatically provisions itself. Just run it.
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/varmankur/keysmash.git
-   cd keysmash
-   ```
+## Quick Start
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+### 1. Install Globally
+Install the package globally via NPM:
+```bash
+npm install -g @lab39/keysmash
+```
 
-3. **Set up your environment:**
-   Copy the example environment file and update the credentials as needed:
-   ```bash
-   cp .env.example .env
-   ```
+### 2. Initialize a Workspace
+Create an empty directory where you want your database and media files to live, and run `keysmash`:
+```bash
+mkdir my-event
+cd my-event
+keysmash
+```
 
-4. **Initialize the database:**
-   ```bash
-   npx prisma db push
-   npx prisma generate
-   ```
+The CLI will automatically copy the required binaries, initialize the SQLite database, and boot the server.
 
-5. **Build and Run (Production HTTPS):**
-   ```bash
-   npm run build
-   npm run start:https
-   ```
-   *The app will automatically generate local self-signed SSL certificates for you on startup. It will be available across your network at `https://<YOUR-IP>:3000`. Users will need to click "Advanced -> Proceed" to bypass the self-signed certificate warning.*
+### 3. Access the Dashboard
+Navigate to the automatically generated secure URL (e.g. `https://localhost:3000/daimon`).
+On your first visit, you will be prompted to create the master **Daimon** administrator account.
 
-## Customizing the Event
-To customize the event name, questions, and footer, edit the configuration file located at:
-`src/config/feedback.config.ts`
+From there, you can create forms and share the URLs with your users!
 
-**Custom Logo Placement:**
-Drop your company/event logo file (e.g., `my-logo.png`) directly into the `public/` directory at the root of the project. Then, update the `logoPath` in `src/config/feedback.config.ts` to reference it (e.g., `logoPath: "/my-logo.png"`).
+---
+
+## Configuration
+
+By default, Key Smash generates a self-signed SSL certificate so that modern browser APIs like `getUserMedia` (Camera/Microphone) function correctly for users on your local Wi-Fi network.
+
+If you are running Key Smash behind a reverse proxy (like Nginx, Traefik, or Cloudflare) that handles HTTPS for you, you can disable the internal SSL generation:
+
+```bash
+DISABLE_HTTPS=true keysmash
+```
+
+## Security
+
+This is proprietary software. The source code is compiled and minified to protect intellectual property. User passwords are salted and hashed.
+
+## Exports & Data
+All uploaded videos, photos, and SQLite database files (`dev.db`) are stored locally in the folder where you ran the `keysmash` command. You can export form responses to a `.zip` directly from the admin dashboard.
