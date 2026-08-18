@@ -4,7 +4,8 @@
   "private": false,
   "files": [
     "bin",
-    ".next",
+    ".next/standalone",
+    ".next/static",
     "public/*.svg",
     "public/*.ico",
     "public/exports/.gitkeep",
