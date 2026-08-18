@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "private": false,
   "files": [
-    "bin"
+    "bin",
+    ".next",
+    "public",
+    "prisma",
+    "scripts",
+    "server.js",
+    "next.config.ts",
+    "tsconfig.json"
   ],
   "bin": {
     "keysmash": "./bin/keysmash.js"
